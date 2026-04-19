@@ -60,9 +60,9 @@ def build_conditional_graph():
 # ============ 3. 使用 create_react_agent ============
 def build_react_agent(model, tools, checkpointer=None):
     """使用预建的 ReAct Agent"""
-    from langgraph.prebuilt import create_react_agent
+    from langchain.agents import create_agent
 
-    return create_react_agent(
+    return create_agent(
         model,
         tools,
         checkpointer=checkpointer,
