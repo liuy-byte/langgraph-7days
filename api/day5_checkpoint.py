@@ -62,7 +62,8 @@ if __name__ == "__main__":
     # 列出所有检查点
     print("\n=== 检查点历史 ===")
     for checkpoint in memory.list(config):
-        print(f"- checkpoint_id: {checkpoint.id}")
+        checkpoint_id = checkpoint.config["configurable"].get("checkpoint_id", "unknown")
+        print(f"- checkpoint_id: {checkpoint_id}")
 
     # 第二次执行（从断点继续）
     print("\n=== 第二次执行（继续） ===")

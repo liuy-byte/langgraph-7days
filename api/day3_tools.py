@@ -49,21 +49,7 @@ if __name__ == "__main__":
     result = get_weather.invoke({"location": "北京"})
     print(f"get_weather('北京') = {result}")
 
-    # 使用 ToolNode 执行工具调用
-    print("\n=== ToolNode 执行 ===")
-    from langgraph.prebuilt import ToolNode
-
-    tool_node = ToolNode(tools)
-
-    # 模拟 LLM 产生的工具调用
-    from langchain_core.messages import AIMessage
-
-    ai_message = AIMessage(
-        content="",
-        tool_calls=[
-            {"name": "multiply", "args": {"a": 5, "b": 6}, "id": "1"}
-        ]
-    )
-
-    result = tool_node.invoke({"messages": [ai_message]})
-    print(f"ToolNode 执行结果: {result}")
+    # 使用 ToolNode 执行工具调用（需要配合 Agent 使用）
+    print("\n=== ToolNode 使用示例 ===")
+    print("ToolNode 需要配合 create_react_agent 使用，详见 Day 4")
+    print("直接调用工具：multiply.invoke({'a': 5, 'b': 6}) =", multiply.invoke({"a": 5, "b": 6}))
