@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # 示例 1：条件边图
     print("=== 示例 1：条件边 Agent ===")
     graph = build_conditional_graph()
-    result = graph.invoke({"messages": [HumanMessage(content="你好")])
+    result = graph.invoke({"messages": [HumanMessage(content="你好")]})
     print(f"执行结果: {result}")
 
     # 示例 2：ReAct Agent（需要配置 model 和 tools）

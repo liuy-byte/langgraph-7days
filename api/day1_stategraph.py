@@ -47,6 +47,10 @@ def build_graph():
     return builder.compile()
 
 
+# 暴露 app 供 langgraph.json / langgraph dev 引用
+app = build_graph()
+
+
 # ============ 4. 执行图 ============
 if __name__ == "__main__":
     # 构建图

@@ -8,7 +8,6 @@ LangGraph 7天系列 Day 2：状态管理与 Reducer
 """
 
 from typing import Annotated, TypedDict
-from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 import operator
 

@@ -7,10 +7,7 @@ LangGraph 7天系列 实战项目：RAG Agent
 from typing import TypedDict, Annotated
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
-from langchain_core.documents import Document
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
-from langgraph.prebuilt import create_agent
+from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
 import operator
 
@@ -59,7 +56,7 @@ def build_rag_agent():
     tools = [retrieve_documents, search_web]
     memory = InMemorySaver()
 
-    agent = create_agent(model, tools, checkpointer=memory)
+    agent = create_react_agent(model, tools, checkpointer=memory)
 
     return agent
 

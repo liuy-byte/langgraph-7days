@@ -24,12 +24,27 @@ def test_day1_stategraph():
 
 def test_day2_state_reducer():
     """Day 2: 状态管理与 Reducer"""
-    from day2_state_reducer import build_conditional_graph
+    from day2_state_reducer import AgentState, ChatState, increment_counter, chat_node
+    from langgraph.graph import StateGraph, START, END
 
-    # 测试计数器
-    graph, _ = build_conditional_graph()
-    # 注意：这个 graph 不接受 checkpointer 参数，需要调整
-    print("✓ Day 2 导入成功")
+    # 验证计数器：operator.add reducer
+    builder = StateGraph(AgentState)
+    builder.add_node("increment", increment_counter)
+    builder.add_edge(START, "increment")
+    builder.add_edge("increment", END)
+    graph = builder.compile()
+    result = graph.invoke({"messages": [], "counter": 0})
+    assert result["counter"] == 1
+
+    # 验证消息追加：自定义 add_messages reducer
+    builder2 = StateGraph(ChatState)
+    builder2.add_node("chat", chat_node)
+    builder2.add_edge(START, "chat")
+    builder2.add_edge("chat", END)
+    graph2 = builder2.compile()
+    result2 = graph2.invoke({"messages": ["你好"]})
+    assert len(result2["messages"]) == 2
+    print("✓ Day 2 测试通过")
 
 
 def test_day3_tools():

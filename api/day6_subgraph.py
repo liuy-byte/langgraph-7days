@@ -8,7 +8,6 @@ LangGraph 7天系列 Day 6：Subgraph 多 Agent 系统
 """
 
 from typing import TypedDict, Annotated
-from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import InMemorySaver
 import operator

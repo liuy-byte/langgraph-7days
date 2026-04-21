@@ -7,14 +7,15 @@ LangGraph 7天系列 Day 8：Streaming 流式输出
 - stream_mode="custom": 流式输出自定义内容
 """
 
-from typing import TypedDict
+from typing import Annotated, TypedDict
 from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import InMemorySaver
 
 
 # ============ 1. 定义状态 ============
 class ChatState(TypedDict):
-    messages: list
+    messages: Annotated[list, add_messages]
 
 
 # ============ 2. 定义节点 ============

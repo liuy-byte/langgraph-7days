@@ -9,7 +9,6 @@ LangGraph 7天系列 Day 7：生产环境部署
 """
 
 from typing import Annotated, TypedDict
-from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 import operator
 

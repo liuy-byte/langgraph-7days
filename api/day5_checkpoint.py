@@ -9,7 +9,6 @@ LangGraph 7天系列 Day 5：Memory 与 Checkpoint
 """
 
 from typing import Annotated, TypedDict
-from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import InMemorySaver
 import operator

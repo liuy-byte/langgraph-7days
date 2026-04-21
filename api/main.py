@@ -92,9 +92,8 @@ builder.add_node("generate", generate)
 builder.add_node("web_search", web_search)
 
 builder.add_edge(START, "retrieve")
-builder.add_edge("retrieve", "generate")
 
-# 如果没有文档，自动联网搜索
+# 检索后根据是否有文档路由：有则生成，没有则联网搜索
 builder.add_conditional_edges(
     "retrieve",
     route_docs,

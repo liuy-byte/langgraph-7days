@@ -34,13 +34,13 @@ def search_web(query: str) -> str:
 # ============ 2. 工具列表 ============
 tools = [multiply, get_weather, search_web]
 
-print("=== 可用工具 ===")
-for t in tools:
-    print(f"- {t.name}: {t.description}")
-
 
 # ============ 3. 简单执行示例 ============
 if __name__ == "__main__":
+    print("=== 可用工具 ===")
+    for t in tools:
+        print(f"- {t.name}: {t.description}")
+
     # 直接调用工具
     print("\n=== 直接调用工具 ===")
     result = multiply.invoke({"a": 3, "b": 4})

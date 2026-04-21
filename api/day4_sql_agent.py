@@ -7,7 +7,7 @@ LangGraph 7天系列 实战项目：SQL Agent
 from typing import TypedDict
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
-from langgraph.prebuilt import create_agent
+from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
 
 
@@ -58,15 +58,15 @@ def build_sql_agent():
     tools = [query_database, describe_table, list_tables]
     memory = InMemorySaver()
 
-    agent = create_agent(
+    agent = create_react_agent(
         model,
         tools,
         checkpointer=memory,
-        prompt="你是一个 SQL 专家。用户用自然语言提问时，你需要：
+        prompt="""你是一个 SQL 专家。用户用自然语言提问时，你需要：
 1. 先查看有哪些表
 2. 查看表结构
 3. 编写并执行 SQL
-4. 用中文回答用户问题"
+4. 用中文回答用户问题""",
     )
 
     return agent
