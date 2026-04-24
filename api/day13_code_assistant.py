@@ -64,13 +64,11 @@ def fix_code(state: CodeAssistantState) -> dict:
     return {"code": code, "iterations": state["iterations"] + 1}
 
 
-def decide_next(state: CodeAssistantState) -> Literal["check_code", "END"]:
-    """决定下一步"""
-    if state["error"] == "no":
-        return END
-    if state["iterations"] >= 3:
-        return END
-    return "fix_code"
+def decide_next(state: CodeAssistantState) -> Literal["finalize", "fix"]:
+    """根据检查结果决定下一步：完成 or 修复重试"""
+    if state["error"] == "no" or state["iterations"] >= 3:
+        return "finalize"
+    return "fix"
 
 
 def finalize(state: CodeAssistantState) -> dict:
@@ -93,8 +91,8 @@ builder.add_edge("generate", "check")
 # 条件边：根据检查结果决定
 builder.add_conditional_edges(
     "check",
-    lambda s: "END" if s["error"] == "no" or s["iterations"] >= 3 else "fix",
-    {"END": "finalize", "fix": "fix"}
+    decide_next,
+    {"finalize": "finalize", "fix": "fix"},
 )
 
 builder.add_edge("fix", "check")  # 修复后重新检查

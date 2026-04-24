@@ -9,6 +9,8 @@ LangGraph 7天系列 Day 2：状态管理与 Reducer
 
 from typing import Annotated, TypedDict
 from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langchain_core.messages import HumanMessage, AIMessage
 import operator
 
 
@@ -30,19 +32,16 @@ def process_messages(state: AgentState) -> dict:
 
 
 # ============ 2. 使用 add_messages ============
-def add_messages(left: list, right: list) -> list:
-    """合并两个消息列表"""
-    return left + right
-
-
 class ChatState(TypedDict):
-    """聊天状态：消息自动追加"""
+    """聊天状态：消息自动追加（官方 add_messages 支持按 message ID 去重/覆盖）"""
     messages: Annotated[list, add_messages]
 
 
 def chat_node(state: ChatState) -> dict:
     """简单聊天节点"""
-    return {"messages": [f"回复: {state['messages'][-1]}"]}
+    last = state["messages"][-1]
+    last_text = last.content if hasattr(last, "content") else str(last)
+    return {"messages": [AIMessage(content=f"回复: {last_text}")]}
 
 
 # ============ 3. 构建并执行图 ============
@@ -66,5 +65,5 @@ if __name__ == "__main__":
     builder2.add_edge("chat", END)
     graph2 = builder2.compile()
 
-    result2 = graph2.invoke({"messages": ["你好"]})
+    result2 = graph2.invoke({"messages": [HumanMessage(content="你好")]})
     print(f"消息追加结果: {result2}")  # messages 应该有两条

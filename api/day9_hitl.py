@@ -39,13 +39,22 @@ def reject_request(state: ApprovalState) -> dict:
 
 
 # ============ 3. 构建图 ============
+def route_after_approval(state: ApprovalState) -> str:
+    """根据人工审批结果路由到 approve / reject"""
+    return "approve" if state.get("approved") else "reject"
+
+
 memory = InMemorySaver()
 builder = StateGraph(ApprovalState)
 builder.add_node("submit", submit_request)
 builder.add_node("approve", process_approved)
 builder.add_node("reject", reject_request)
 builder.add_edge(START, "submit")
-builder.add_edge("submit", "approve")  # 实际上会被 interrupt 阻断
+builder.add_conditional_edges(
+    "submit",
+    route_after_approval,
+    {"approve": "approve", "reject": "reject"},
+)
 builder.add_edge("approve", END)
 builder.add_edge("reject", END)
 
@@ -70,18 +79,10 @@ if __name__ == "__main__":
         print("提示: 在实际应用中，用户会在 UI 界面审批")
         print("这里用 Command(resume=...) 模拟审批:")
 
-        # 模拟用户批准
+        # 模拟用户批准：传 True 走 approve，传 False 走 reject
         approved = True
-        if approved:
-            # 恢复执行，走 approve 节点
-            resume_result = app.invoke(
-                Command(resume=True),
-                config
-            )
-            print(f"批准后结果: {resume_result}")
-        else:
-            # 恢复执行，走 reject 节点（需要修改图结构支持）
-            print("拒绝: 实际需要通过条件边控制")
+        resume_result = app.invoke(Command(resume=approved), config)
+        print(f"审批后结果: {resume_result}")
 
     print()
     print("✅ Human-in-the-Loop 演示完成！")

@@ -15,27 +15,24 @@ import operator
 
 
 # ============ 1. 带 Checkpoint 的状态 ============
-class CheckpointState(TypedDict):
+class ConversationState(TypedDict):
     messages: Annotated[list, operator.add]
     counter: int
 
 
-def increment(state: CheckpointState) -> dict:
-    return {"counter": state["counter"] + 1}
-
-
-def process(state: CheckpointState) -> dict:
-    return {"messages": [f"处理 #{state['counter']}"]}
+def chat_node(state: ConversationState) -> dict:
+    return {
+        "messages": [f"回复: {state['messages'][-1] if state['messages'] else '你好'}"],
+        "counter": state["counter"] + 1
+    }
 
 
 # ============ 2. 构建带 Checkpoint 的图 ============
 def build_checkpoint_graph():
-    builder = StateGraph(CheckpointState)
-    builder.add_node("increment", increment)
-    builder.add_node("process", process)
-    builder.add_edge(START, "increment")
-    builder.add_edge("increment", "process")
-    builder.add_edge("process", END)
+    builder = StateGraph(ConversationState)
+    builder.add_node("chat", chat_node)
+    builder.add_edge(START, "chat")
+    builder.add_edge("chat", END)
 
     # 使用 InMemorySaver 作为检查点
     memory = InMemorySaver()

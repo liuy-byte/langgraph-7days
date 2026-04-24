@@ -29,7 +29,7 @@ def process(state: ChatState) -> dict:
     return {"messages": [{"role": "system", "content": "处理完成"}]}
 
 
-# ============ 3. 构建图（带 Checkpointer 以支持流式） ============
+# ============ 3. 构建图（Checkpointer 供多轮/断点使用，流式本身不依赖它） ============
 memory = InMemorySaver()
 builder = StateGraph(ChatState)
 builder.add_node("chatbot", chatbot)

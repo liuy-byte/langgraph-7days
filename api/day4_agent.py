@@ -8,7 +8,7 @@ LangGraph 7天系列 Day 4：Agent 开发 - ReAct 循环
 """
 
 from typing import TypedDict, Literal
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END, MessagesState
 
 
@@ -28,12 +28,12 @@ def should_continue(state: AgentState) -> Literal["action", "end"]:
 
 def reasoning_node(state: AgentState) -> dict:
     """推理节点：思考下一步行动"""
-    return {"messages": [HumanMessage(content="让我思考一下...")]}
+    return {"messages": [AIMessage(content="让我思考一下...")]}
 
 
 def action_node(state: AgentState) -> dict:
     """行动节点：执行工具调用"""
-    return {"messages": [HumanMessage(content="执行工具...")]}
+    return {"messages": [AIMessage(content="执行工具...")]}
 
 
 # ============ 2. 构建条件边图 ============
@@ -60,9 +60,9 @@ def build_conditional_graph():
 # ============ 3. 使用 create_react_agent ============
 def build_react_agent(model, tools, checkpointer=None):
     """使用预建的 ReAct Agent"""
-    from langchain.agents import create_agent
+    from langgraph.prebuilt import create_react_agent
 
-    return create_agent(
+    return create_react_agent(
         model,
         tools,
         checkpointer=checkpointer,

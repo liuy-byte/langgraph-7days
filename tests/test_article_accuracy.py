@@ -26,6 +26,8 @@ def test_day2_state_reducer():
     """Day 2: 状态管理与 Reducer"""
     from day2_state_reducer import AgentState, ChatState, increment_counter, chat_node
     from langgraph.graph import StateGraph, START, END
+    from langgraph.graph.message import add_messages as official_add_messages
+    from langchain_core.messages import HumanMessage, AIMessage
 
     # 验证计数器：operator.add reducer
     builder = StateGraph(AgentState)
@@ -36,15 +38,45 @@ def test_day2_state_reducer():
     result = graph.invoke({"messages": [], "counter": 0})
     assert result["counter"] == 1
 
-    # 验证消息追加：自定义 add_messages reducer
+    # 验证消息追加：使用官方 add_messages reducer（而非自定义）
+    import day2_state_reducer
+    assert day2_state_reducer.add_messages is official_add_messages, \
+        "Day 2 必须使用 langgraph.graph.message.add_messages，而不是自定义函数"
+
     builder2 = StateGraph(ChatState)
     builder2.add_node("chat", chat_node)
     builder2.add_edge(START, "chat")
     builder2.add_edge("chat", END)
     graph2 = builder2.compile()
-    result2 = graph2.invoke({"messages": ["你好"]})
+    result2 = graph2.invoke({"messages": [HumanMessage(content="你好")]})
     assert len(result2["messages"]) == 2
+    assert isinstance(result2["messages"][-1], AIMessage)
     print("✓ Day 2 测试通过")
+
+
+def test_day4_agent():
+    """Day 4: ReAct Agent 条件边与消息类型"""
+    from day4_agent import build_conditional_graph, reasoning_node, action_node
+    from langchain_core.messages import AIMessage, HumanMessage
+
+    # 推理/行动节点应返回 AIMessage（AI 产出，而非人类消息）
+    r1 = reasoning_node({"messages": []})
+    r2 = action_node({"messages": []})
+    assert isinstance(r1["messages"][0], AIMessage)
+    assert isinstance(r2["messages"][0], AIMessage)
+
+    # 条件图：无 tool_calls 的消息 → 走 end 分支
+    graph = build_conditional_graph()
+    result = graph.invoke({"messages": [HumanMessage(content="你好")]})
+    assert "messages" in result
+
+    # 验证 create_react_agent 来自正确的包
+    import inspect
+    from day4_agent import build_react_agent
+    src = inspect.getsource(build_react_agent)
+    assert "langgraph.prebuilt" in src, "必须使用 langgraph.prebuilt.create_react_agent"
+    assert "create_react_agent" in src
+    print("✓ Day 4 测试通过")
 
 
 def test_day3_tools():
@@ -88,14 +120,60 @@ def test_day7_deploy():
     print("✓ Day 7 测试通过")
 
 
+def test_day9_hitl_approve_and_reject():
+    """Day 9: Human-in-the-Loop 必须支持批准/拒绝两条分支"""
+    from day9_hitl import app
+    from langgraph.types import Command
+
+    # 批准路径
+    cfg_ok = {"configurable": {"thread_id": "hitl-approve"}}
+    initial = app.invoke({"request": "批准测试", "approved": None, "result": ""}, cfg_ok)
+    assert "__interrupt__" in initial
+    approved = app.invoke(Command(resume=True), cfg_ok)
+    assert approved["result"].startswith("✅")
+
+    # 拒绝路径：必须真的走 reject 节点
+    cfg_no = {"configurable": {"thread_id": "hitl-reject"}}
+    initial = app.invoke({"request": "拒绝测试", "approved": None, "result": ""}, cfg_no)
+    assert "__interrupt__" in initial
+    rejected = app.invoke(Command(resume=False), cfg_no)
+    assert rejected["result"].startswith("❌"), \
+        f"拒绝路径未生效（reject 节点不可达），实际结果: {rejected['result']}"
+    print("✓ Day 9 测试通过")
+
+
+def test_day13_decide_next():
+    """Day 13: decide_next 必须被条件边真正使用"""
+    from day13_code_assistant import decide_next, app
+
+    # 无错误 → finalize
+    assert decide_next({"error": "no", "iterations": 1, "task": "", "code": "", "result": ""}) == "finalize"
+    # 达到迭代上限 → finalize
+    assert decide_next({"error": "yes", "iterations": 3, "task": "", "code": "", "result": ""}) == "finalize"
+    # 有错但未到上限 → fix
+    assert decide_next({"error": "yes", "iterations": 1, "task": "", "code": "", "result": ""}) == "fix"
+
+    # 端到端：简单任务应产生 result
+    config = {"configurable": {"thread_id": "day13-test"}}
+    result = app.invoke({
+        "task": "Hello World", "code": "", "error": "",
+        "iterations": 0, "result": "",
+    }, config)
+    assert result["result"].startswith("最终代码:")
+    print("✓ Day 13 测试通过")
+
+
 if __name__ == "__main__":
     print("运行 LangGraph 7天系列测试...\n")
 
     test_day1_stategraph()
     test_day2_state_reducer()
     test_day3_tools()
+    test_day4_agent()
     test_day5_checkpoint()
     test_day6_subgraph()
     test_day7_deploy()
+    test_day9_hitl_approve_and_reject()
+    test_day13_decide_next()
 
     print("\n所有测试通过！✓")

@@ -5,6 +5,7 @@ LangGraph 7天系列 实战项目：RAG Agent
 """
 
 from typing import TypedDict, Annotated
+import os
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
@@ -47,10 +48,16 @@ class RAGState(TypedDict):
 # ============ 3. RAG Agent 构建 ============
 def build_rag_agent():
     """构建 RAG Agent"""
+    api_key = os.environ.get("SILICONFLOW_API_KEY")
+    if not api_key:
+        raise EnvironmentError(
+            "请设置环境变量 SILICONFLOW_API_KEY\n"
+            "  export SILICONFLOW_API_KEY=sk-your-key-here"
+        )
     model = ChatOpenAI(
-        model="Pro/MiniMaxAI/MiniMax-M2.5",
+        model=os.environ.get("MODEL_NAME", "Pro/MiniMaxAI/MiniMax-M2.5"),
         base_url="https://api.siliconflow.cn/v1",
-        api_key="sk-xxxx"
+        api_key=api_key,
     )
 
     tools = [retrieve_documents, search_web]
